@@ -1,5 +1,5 @@
 {
-  "name": "v-bucket",
+  "name": "@mediv0/v-bucket",
   "version": "1.0.0",
   "private": false,
   "description": "📦 Fast, Simple, and Lightweight State Management for Vue 3.0 built with composition API, inspired by Vuex.",
