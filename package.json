@@ -1,7 +1,37 @@
 {
-  "name": "vue-shitbucket",
-  "version": "0.1.0",
-  "private": true,
+  "name": "v-bucket",
+  "version": "1.0.0",
+  "private": false,
+  "description": "📦 Fast, Simple, and Lightweight State Management for Vue 3.0 built with composition API, inspired by Vuex.",
+  "author": "Mahdi Fakhr",
+  "license": "MIT",
+  "main": "dist/v-bucket.cjs.js",
+  "module": "dist/v-bucket.esm-bundler.js",
+  "browser": "dist/v-bucket.esm-browser.js",
+  "unpkg": "dist/v-bucket.global.js",
+  "jsdelivr": "dist/v-bucket.global.js",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "homepage": "https://github.com/mediv0/v-bucket",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mediv0/v-bucket"
+  },
+  "bugs": {
+    "url": "https://github.com/mediv0/v-bucket/issues"
+  },
+  "keywords": [
+    "vue",
+    "vuejs",
+    "vuex",
+    "state",
+    "state manager",
+    "simple state managment",
+    "vue3.0",
+    "compositionApi",
+    "vue-3.0-Plugin",
     "vueLibrary"
   ],
   "scripts": {
