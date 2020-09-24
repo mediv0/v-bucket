@@ -25,7 +25,6 @@
 
 
 ## Examples
-- [CodeSandbox](https://codesandbox.io/s/jolly-hertz-yqsgs?file=/src/bucket.js)
 - [Counter](https://github.com/mediv0/v-bucket/blob/master/examples/components/counter.vue)
 - [Shopping Cart](https://github.com/mediv0/v-bucket/blob/master/examples/components/shop.vue)
 
