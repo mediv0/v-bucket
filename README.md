@@ -467,7 +467,7 @@ const moduleA = {
 
 ## Contribution
 
-Please make sure to read the [Contributing Guide](https://github.com/vuejs/vuex/blob/dev/.github/contributing.md) before making a pull request.
+Please make sure to read the [Contributing Guide](https://github.com/mediv0/v-bucket/blob/master/.github/contributing.md) before making a pull request.
 
 ## License
 
