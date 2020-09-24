@@ -1,13 +1,10 @@
-# v-bucket [![Build Status](https://circleci.com/gh/vuejs/vuex/tree/dev.png?style=shield)](https://circleci.com/gh/vuejs/vuex)
+# v-bucket
 
 > 📦 Fast, Simple, and Lightweight State Management for Vue 3.0 built with composition API, inspired by Vuex.
 
 <p align="center">
   <img width="700px" src="https://i.imgur.com/i7USWPo.jpg">
 </p>
-
-- [What is Vuex?](https://vuex.vuejs.org/)
-- [Full Documentation](http://vuex.vuejs.org/)
 
 ## Content Table
 
@@ -28,9 +25,9 @@
 
 
 ## Examples
-- [CodeSandbox](https://github.com/vuejs/vuex/tree/dev/examples/shopping-cart)
-- [Counter](https://github.com/vuejs/vuex/tree/dev/examples/counter)
-- [Shopping Cart](https://github.com/vuejs/vuex/tree/dev/examples/shopping-cart)
+- [CodeSandbox](https://codesandbox.io/s/jolly-hertz-yqsgs?file=/src/bucket.js)
+- [Counter](https://github.com/mediv0/v-bucket/blob/master/examples/components/counter.vue)
+- [Shopping Cart](https://github.com/mediv0/v-bucket/blob/master/examples/components/shop.vue)
 
 Running the examples:
 
