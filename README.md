@@ -46,11 +46,11 @@ $ yarn test
 
 install this package from NPM:
 ``` bash
-$ npm install v-bucket
+$ npm install @mediv0/v-bucket
 ```
 or yarn:
 ``` bash
-$ yarn add v-bucket
+$ yarn add @mediv0/v-bucket
 ```
 
 ## usage
@@ -59,7 +59,7 @@ first you need to create your bucket.
 create an index.js file, then import createBucket from v-bucket to start creating your store, like this:
 
 ```javascript
-import { createBucket } from "v-bucket";
+import { createBucket } from "@mediv0/v-bucket";
 
 const bucket = createBucket({
     states: {
@@ -97,7 +97,7 @@ for using v-bucket inside the setup() function you need to import useBucket firs
 
 ```javascript
 <script>
-import { useBucket } from "v-bucket"
+import { useBucket } from "@mediv0/v-bucket"
 export default {
     setup() {
         // get access to the v-bucket
@@ -159,7 +159,7 @@ accessing states:
 declare states inside your bucket (index.js):
 
 ```javascript
-import { createBucket } from "v-bucket";
+import { createBucket } from "@mediv0/v-bucket";
 
 const bucket = createBucket({
     states: {
