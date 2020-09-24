@@ -1,14 +1,13 @@
-# Vuex Contributing Guide
+# v-bucket Contributing Guide
 
-Hi! We're really excited that you are interested in contributing to Vuex. Before submitting your contribution, please make sure to take a moment and read through the following guidelines:
+Hi! We're really excited that you are interested in contributing to v-bucket. Before submitting your contribution, please make sure to take a moment and read through the following guidelines:
 
-- [Code of Conduct](https://github.com/vuejs/vue/blob/dev/.github/CODE_OF_CONDUCT.md)
 - [Issue Reporting Guidelines](#issue-reporting-guidelines)
 - [Pull Request Guidelines](#pull-request-guidelines)
 
 ## Issue Reporting Guidelines
 
-- Always use [https://new-issue.vuejs.org/](https://new-issue.vuejs.org/) to create new issues.
+- Always use [bug_report template](https://github.com/mediv0/v-bucket/blob/master/.github/ISSUE_TEMPLATE/bug_report.md) to create new issues.
 
 ## Pull Request Guidelines
 
@@ -25,11 +24,8 @@ Hi! We're really excited that you are interested in contributing to Vuex. Before
 
 - If fixing bug:
 
-  - If you are resolving a special issue, add `(fix #xxxx[,#xxxx])` (#xxxx is the issue id) in your PR title for a better release log, e.g. `update state re-evaluation (fix #3899)`.
   - Provide a detailed description of the bug in the PR. Live demo preferred.
 
 - It's OK to have multiple small commits as you work on the PR - GitHub can automatically squash them before merging.
 
 - Make sure tests pass!
-
-- Commit messages must follow the [commit message convention](./commit-convention.md) so that changelogs can be automatically generated.
