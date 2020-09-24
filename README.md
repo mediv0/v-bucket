@@ -2,7 +2,7 @@
 > 📦 Fast, Simple, and Lightweight State Management for Vue 3.0 built with composition API, inspired by Vuex.
 
 <p align="center">
-  <img width="700px" src="https://i.imgur.com/i7USWPo.jpg">
+  <img width="500px" src="https://i.imgur.com/6wQ0GRr.png">
 </p>
 
 ## Content Table
