@@ -1,5 +1,4 @@
-# v-bucket
-
+# v-bucket [![Codecov Coverage](https://img.shields.io/codecov/c/github/mediv0/v-bucket/coverage.svg?style=flat-square)](https://codecov.io/gh/mediv0/v-bucket) [![Code Grade](https://www.code-inspector.com/project/13923/status/svg)](https://www.code-inspector.com/project/13923/status/svg) [![License](https://img.shields.io/github/license/mediv0/v-bucket)](https://img.shields.io/github/license/mediv0/v-bucket)
 > 📦 Fast, Simple, and Lightweight State Management for Vue 3.0 built with composition API, inspired by Vuex.
 
 <p align="center">
