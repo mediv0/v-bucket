@@ -115,7 +115,7 @@ export default {
 
 ## using with option api
 
-like vue 2.X apps you can access v-bucket on the vue instace outside of the setup() function. like this:
+like vue 2.X apps you can access v-bucket on the vue instance outside of the setup() function. like this:
 
 ```javascript
 <script>
@@ -330,7 +330,7 @@ methods: {
  }
 ```
 
-**_the context parameter will return root istance of our bucket. this is useful when working with modules._**
+**_the context parameter will return root instance of our bucket. this is useful when working with modules._**
 
 ## modules
 
