@@ -404,8 +404,10 @@ methods: {
 they above code represent something like this:
 
 -root
---moduleA
---moduleB
+
+-----moduleA
+
+-----moduleB
 
 
 ## how to access module mutations
