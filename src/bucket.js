@@ -26,23 +26,33 @@ export class Bucket {
                 `
             );
         }
-        const {
-            name,
-            states,
-            mutations,
-            actions,
-            getters,
-            modules,
-            plugins
-        } = opts;
         const _root = this;
+        this.initializeSettings(opts);
+        this.commit = function boundCommit(_name, _payload) {
+            return _root.triggerCommit(_name, _payload);
+        };
+        this.dispatch = function boundDispatch(_name, _payload) {
+            return _root.triggerDispatch(_root, _name, _payload);
+        };
+        this.installModules();
+        createStateTree(_root);
+    }
 
+    initializeSettings({
+        name,
+        states,
+        mutations,
+        actions,
+        getters,
+        modules,
+        plugins
+    }) {
         // internal variables
         this._name = name || "root";
         this._data = reactive(states);
         this._mutations = mutations || Object.create(null);
         this._getters = this.interceptGetters(
-            _root,
+            this,
             getters || Object.create(null)
         );
         this._actions = actions || Object.create(null);
@@ -52,17 +62,6 @@ export class Bucket {
         this._onMutationSubscribers = new Set();
         this._onActionSubscribers = new Set();
         this._pluginSubscribers = this.installPlugins(plugins);
-
-        this.commit = function boundCommit(_name, _payload) {
-            return _root.triggerCommit(_name, _payload);
-        };
-
-        this.dispatch = function boundDispatch(_name, _payload) {
-            return _root.triggerDispatch(_root, _name, _payload);
-        };
-
-        this.installModules();
-        createStateTree(_root);
     }
 
     triggerCommit(_name, _payload) {
