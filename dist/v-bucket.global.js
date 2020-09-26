@@ -1,5 +1,5 @@
 /*!
- * vbucket v1.0.0
+ * v-bucket v1.1.0
  * (c) 2020 Mahdi Fakhr
  * @license MIT
  */
@@ -110,6 +110,21 @@ var vbucket = (function(vue) {
         return InvalidGetterException;
     })(Error);
 
+    var InstallPluginsOnModulesException = /*@__PURE__*/ (function(Error) {
+        function InstallPluginsOnModulesException(message) {
+            Error.call(this, message);
+            this.name = "InstallPluginsOnModulesException";
+        }
+
+        if (Error) InstallPluginsOnModulesException.__proto__ = Error;
+        InstallPluginsOnModulesException.prototype = Object.create(
+            Error && Error.prototype
+        );
+        InstallPluginsOnModulesException.prototype.constructor = InstallPluginsOnModulesException;
+
+        return InstallPluginsOnModulesException;
+    })(Error);
+
     function isDefined(v) {
         return v !== undefined && v !== null;
     }
@@ -165,6 +180,16 @@ var vbucket = (function(vue) {
 
     function isObjectEmpty(o) {
         return Object.keys(o).length === 0;
+    }
+
+    function hasPlugin(arr) {
+        if (Array.isArray(arr) && arr.length > 0) {
+            var _everyFn = arr.every(function(el) {
+                return typeof el === "function";
+            });
+            return _everyFn;
+        }
+        return false;
     }
 
     function searchNestedModules(path, bucket) {
@@ -237,14 +262,17 @@ var vbucket = (function(vue) {
                     " as your root module. please provide a valid object format\n                    your object should contain [states, mutations, actions, getters, modules]\n                "
             );
         }
+        var name = opts.name;
         var states = opts.states;
         var mutations = opts.mutations;
         var actions = opts.actions;
         var getters = opts.getters;
         var modules = opts.modules;
+        var plugins = opts.plugins;
         var _root = this;
 
         // internal variables
+        this._name = name || "root";
         this._data = vue.reactive(states);
         this._mutations = mutations || Object.create(null);
         this._getters = this.interceptGetters(
@@ -255,6 +283,9 @@ var vbucket = (function(vue) {
         this._modules = modules || Object.create(null);
         this._states = Object.create(null);
         this._modulesDictionary = new Map();
+        this._onMutationSubscribers = new Set();
+        this._onActionSubscribers = new Set();
+        this._pluginSubscribers = this.installPlugins(plugins);
 
         this.commit = function boundCommit(_name, _payload) {
             return _root.triggerCommit(_name, _payload);
@@ -263,8 +294,9 @@ var vbucket = (function(vue) {
         this.dispatch = function boundDispatch(_name, _payload) {
             return _root.triggerDispatch(_root, _name, _payload);
         };
+
         this.installModules();
-        createStateTree(this);
+        createStateTree(_root);
     };
 
     var prototypeAccessors = {
@@ -289,6 +321,12 @@ var vbucket = (function(vue) {
             );
         }
         _fn(module._data, _payload);
+        this.notifyPlugins("mutation", {
+            name: actionName,
+            module: this._name,
+            fullPath: "root/" + _name,
+            payload: _payload
+        });
     };
 
     Bucket.prototype.triggerDispatch = function triggerDispatch(
@@ -315,6 +353,13 @@ var vbucket = (function(vue) {
         if (isPromise(_asyncDispatch)) {
             return _asyncDispatch;
         }
+
+        this.notifyPlugins("actions", {
+            name: actionName,
+            module: this._name,
+            fullPath: "root/" + _name,
+            payload: _payload
+        });
     };
 
     prototypeAccessors.state.get = function() {
@@ -376,12 +421,57 @@ var vbucket = (function(vue) {
                     installModules will be called on new Bucket instance. 
                     so it will recursively register modules for current instance and return it to the root.
                 */
-                var bucket = new Bucket(entry[1]);
+                var bucket = new Bucket(
+                    Object.assign(
+                        {},
+                        { name: entry[0] }, // set name for each module
+                        entry[1]
+                    )
+                );
                 _instance._modulesDictionary.set(entry[0], bucket);
             });
         } else {
             return;
         }
+    };
+
+    Bucket.prototype.installPlugins = function installPlugins(_plugins) {
+        var this$1 = this;
+
+        if (this._name !== "root" && hasPlugin(_plugins)) {
+            throw new InstallPluginsOnModulesException(
+                "\n                You can only register plugins in the root module."
+            );
+        }
+
+        if (_plugins === undefined || isObjectEmpty(_plugins)) {
+            return Object.create(null);
+        }
+
+        this.onMutation = function boundNotify(_cb) {
+            this._onMutationSubscribers.add(_cb);
+        };
+        this.onAction = function boundNotify(_cb) {
+            this._onActionSubscribers.add(_cb);
+        };
+
+        // call the plugins
+        Object.values(_plugins).forEach(function(plugin) {
+            plugin(this$1);
+        });
+
+        return _plugins;
+    };
+
+    Bucket.prototype.notifyPlugins = function notifyPlugins(_type, _value) {
+        // maybe use ENUMS idk!
+        var _callbackFns =
+            _type === "mutation"
+                ? this._onMutationSubscribers
+                : this._onActionSubscribers;
+        [].concat(_callbackFns.values()).forEach(function(cb) {
+            cb(_value);
+        });
     };
 
     Bucket.prototype.install = function install(app, injectKey) {
