@@ -48,3 +48,10 @@ export class InvalidGetterException extends Error {
         this._namespace = v;
     }
 }
+
+export class InstallPluginsOnModulesException extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "InstallPluginsOnModulesException";
+    }
+}

@@ -1,12 +1,19 @@
 import { reactive, computed } from "vue";
 import { bucketKey } from "./inject";
-import { isPromise, parsePath, isObject, isObjectEmpty } from "./utils";
+import {
+    isPromise,
+    parsePath,
+    isObject,
+    isObjectEmpty,
+    hasPlugin
+} from "./utils";
 import { searchNestedModules, createStateTree } from "./helpers";
 import {
     InvalidCommitException,
     InvalidDispatchException,
     InvalidGetterException,
-    NoOptionException
+    NoOptionException,
+    InstallPluginsOnModulesException
 } from "./Errors";
 
 export class Bucket {
@@ -19,10 +26,19 @@ export class Bucket {
                 `
             );
         }
-        const { states, mutations, actions, getters, modules } = opts;
+        const {
+            name,
+            states,
+            mutations,
+            actions,
+            getters,
+            modules,
+            plugins
+        } = opts;
         const _root = this;
 
         // internal variables
+        this._name = name || "root";
         this._data = reactive(states);
         this._mutations = mutations || Object.create(null);
         this._getters = this.interceptGetters(
@@ -33,6 +49,9 @@ export class Bucket {
         this._modules = modules || Object.create(null);
         this._states = Object.create(null);
         this._modulesDictionary = new Map();
+        this._onMutationSubscribers = new Set();
+        this._onActionSubscribers = new Set();
+        this._pluginSubscribers = this.installPlugins(plugins);
 
         this.commit = function boundCommit(_name, _payload) {
             return _root.triggerCommit(_name, _payload);
@@ -41,8 +60,9 @@ export class Bucket {
         this.dispatch = function boundDispatch(_name, _payload) {
             return _root.triggerDispatch(_root, _name, _payload);
         };
+
         this.installModules();
-        createStateTree(this);
+        createStateTree(_root);
     }
 
     triggerCommit(_name, _payload) {
@@ -59,6 +79,12 @@ export class Bucket {
             `);
         }
         _fn(module._data, _payload);
+        this.notifyPlugins("mutation", {
+            name: actionName,
+            module: this._name,
+            fullPath: `root/${_name}`,
+            payload: _payload
+        });
     }
 
     triggerDispatch(_self, _name, _payload) {
@@ -78,6 +104,13 @@ export class Bucket {
         if (isPromise(_asyncDispatch)) {
             return _asyncDispatch;
         }
+
+        this.notifyPlugins("actions", {
+            name: actionName,
+            module: this._name,
+            fullPath: `root/${_name}`,
+            payload: _payload
+        });
     }
 
     get state() {
@@ -130,12 +163,51 @@ export class Bucket {
                     installModules will be called on new Bucket instance. 
                     so it will recursively register modules for current instance and return it to the root.
                 */
-                const bucket = new Bucket(entry[1]);
+                const bucket = new Bucket({
+                    ...{ name: entry[0] }, // set name for each module
+                    ...entry[1]
+                });
                 _instance._modulesDictionary.set(entry[0], bucket);
             });
         } else {
             return;
         }
+    }
+
+    installPlugins(_plugins) {
+        if (this._name !== "root" && hasPlugin(_plugins)) {
+            throw new InstallPluginsOnModulesException(`
+                You can only register plugins in the root module.`);
+        }
+
+        if (_plugins === undefined || isObjectEmpty(_plugins)) {
+            return Object.create(null);
+        }
+
+        this.onMutation = function boundNotify(_cb) {
+            this._onMutationSubscribers.add(_cb);
+        };
+        this.onAction = function boundNotify(_cb) {
+            this._onActionSubscribers.add(_cb);
+        };
+
+        // call the plugins
+        Object.values(_plugins).forEach(plugin => {
+            plugin(this);
+        });
+
+        return _plugins;
+    }
+
+    notifyPlugins(_type, _value) {
+        // maybe use ENUMS idk!
+        const _callbackFns =
+            _type === "mutation"
+                ? this._onMutationSubscribers
+                : this._onActionSubscribers;
+        [..._callbackFns.values()].forEach(cb => {
+            cb(_value);
+        });
     }
 
     install(app, injectKey) {

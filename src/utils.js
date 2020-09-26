@@ -48,3 +48,11 @@ export function isObject(o) {
 export function isObjectEmpty(o) {
     return Object.keys(o).length === 0;
 }
+
+export function hasPlugin(arr) {
+    if (Array.isArray(arr) && arr.length > 0) {
+        const _everyFn = arr.every(el => typeof el === "function");
+        return _everyFn;
+    }
+    return false;
+}
