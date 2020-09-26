@@ -4,6 +4,11 @@ module.exports = {
         "^.+\\.vue$": "vue-jest"
     },
     coverageDirectory: "coverage",
-    collectCoverageFrom: ["./src/*.js", "!./src/index.js", "!./src/inject.js"],
+    collectCoverageFrom: [
+        "./src/*.js",
+        "!./src/index.js",
+        "!./src/inject.js",
+        "!./src/index.cjs.js"
+    ],
     collectCoverage: true
 };
