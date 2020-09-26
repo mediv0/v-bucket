@@ -9,7 +9,6 @@ import { ModuleNotFound } from "./Errors";
 export function searchNestedModules(path, bucket) {
     // if the path already calculated. there is no need to do it again
     const _nodes = (isPathAlreadyCalculated(path) && path) || parsePath(path);
-
     let _lastModuleName = "root";
     // if the user just provide a name but not a valid path, we return the root instance
     if (_nodes.length === 1 && isStringNotEmpty(_nodes)) {
@@ -23,28 +22,21 @@ export function searchNestedModules(path, bucket) {
     // iterate over the modules tree to find the current module
     for (let i = 0; _nodes.length > 1; i++) {
         // remove visited module
-        const _nextPath = _nodes.shift();
-        _lastModuleName = _nextPath;
+        _lastModuleName = _nodes.shift();
         // get nested module if there is any
-        _currentModule = _currentModule._modulesDictionary.get(_nextPath);
+        _currentModule = _currentModule._modulesDictionary.get(_lastModuleName);
         if (!_currentModule) {
             throw new ModuleNotFound(
-                `We couldn't find your requested module. path: ${path} # module: ${_nextPath}`
+                `We couldn't find your requested module. path: ${path} # module: ${_lastModuleName}`
             );
         }
     }
-
-    /*
-            we use slice to prevent mutation
-    */
-    const actionName = _nodes.slice(-1).toString();
-    const nextModuleName = _lastModuleName;
-    const nextPath = arrayToPath(..._nodes);
     return {
         module: _currentModule,
-        actionName,
-        nextModuleName,
-        nextPath
+        // we use slice to prevent mutation
+        actionName: _nodes.slice(-1).toString(),
+        nextModuleName: _lastModuleName,
+        nextPath: arrayToPath(..._nodes)
     };
 }
 
