@@ -1,9 +1,10 @@
-import { createBucket } from "@/index";
+import { createBucket, Bucket } from "@/index";
 import {
     NoOptionException,
     InvalidCommitException,
     InvalidDispatchException,
-    InvalidGetterException
+    InvalidGetterException,
+    InstallPluginsOnModulesException
 } from "@/Errors";
 
 import { createApp } from "vue";
@@ -427,5 +428,165 @@ describe("bucket.js", () => {
 
         bucket.commit("SET_A", 2);
         expect(bucket.getters["GET_A"]).toBe(2);
+    });
+
+    it("installing a plugin", () => {
+        const myPlugin = jest.fn();
+        const installPluginsSpy = jest.spyOn(
+            Bucket.prototype,
+            "installPlugins"
+        );
+        myPlugin.mockReturnValue(() => {});
+
+        const plugins = [myPlugin()];
+        const bucket = createBucket({
+            plugins
+        });
+
+        expect(bucket._pluginSubscribers).toEqual(plugins);
+        expect(bucket._pluginSubscribers.length).toBe(1);
+        expect(installPluginsSpy).toHaveBeenCalledWith(plugins);
+        expect(installPluginsSpy).toHaveBeenCalledTimes(1);
+        expect(myPlugin).toHaveBeenCalled();
+    });
+
+    it("installing plugins on child modules should throw an error", () => {
+        const myPlugin = jest.fn();
+        myPlugin.mockReturnValue(() => {});
+
+        const plugins = [myPlugin()];
+
+        const module1 = {
+            plugins
+        };
+
+        expect(() => {
+            createBucket({
+                modules: {
+                    module1
+                }
+            });
+        }).toThrow(InstallPluginsOnModulesException);
+    });
+
+    it("installing a plugin with hooks", () => {
+        const myPlugin = () => bucket => {
+            bucket.onMutation(() => {});
+            bucket.onAction(() => {});
+        };
+
+        const plugins = [myPlugin()];
+        const bucket = createBucket({
+            plugins
+        });
+
+        expect(bucket._pluginSubscribers).toEqual(plugins);
+        expect(bucket._pluginSubscribers.length).toBe(1);
+        expect(bucket._onMutationSubscribers.size).toBe(1);
+        expect(bucket._onActionSubscribers.size).toBe(1);
+    });
+
+    it("installing a plugin with multiple hooks", () => {
+        const myPlugin = () => bucket => {
+            bucket.onMutation(() => {});
+            bucket.onMutation(() => {});
+            bucket.onMutation(() => {});
+
+            bucket.onAction(() => {});
+            bucket.onAction(() => {});
+        };
+
+        const plugins = [myPlugin()];
+        const bucket = createBucket({
+            plugins
+        });
+
+        expect(bucket._pluginSubscribers).toEqual(plugins);
+        expect(bucket._pluginSubscribers.length).toBe(1);
+        expect(bucket._onMutationSubscribers.size).toBe(3);
+        expect(bucket._onActionSubscribers.size).toBe(2);
+    });
+
+    it("committing a mutation should notify onMutation hooks", () => {
+        const onMutationSpy = jest.spyOn(Bucket.prototype, "notifyPlugins");
+
+        const mutationMock = {
+            name: "SET_ID",
+            module: "root",
+            fullPath: "root/SET_ID",
+            payload: undefined
+        };
+        const onMutationCallback = jest.fn();
+
+        const myPlugin = () => bucket => {
+            bucket.onMutation(onMutationCallback);
+        };
+
+        const plugins = [myPlugin()];
+        const bucket = createBucket({
+            states: {
+                id: 1
+            },
+            mutations: {
+                SET_ID(state) {
+                    state.id = 2;
+                }
+            },
+            plugins
+        });
+
+        expect(bucket._pluginSubscribers).toEqual(plugins);
+        expect(bucket._pluginSubscribers.length).toBe(1);
+        expect(bucket._onMutationSubscribers.size).toBe(1);
+
+        bucket.commit("SET_ID");
+        expect(onMutationSpy).toHaveBeenCalled();
+        expect(onMutationSpy).toHaveBeenCalledTimes(1);
+        expect(onMutationSpy).toHaveBeenCalledWith("mutation", mutationMock);
+
+        expect(onMutationCallback).toHaveBeenCalled();
+        expect(onMutationCallback).toHaveBeenCalledWith(mutationMock);
+        onMutationSpy.mockClear();
+    });
+
+    it("dispatching an action should notify onAction hooks", () => {
+        const onMutationSpy = jest.spyOn(Bucket.prototype, "notifyPlugins");
+
+        const actionMock = {
+            name: "SET_ID",
+            module: "root",
+            fullPath: "root/SET_ID",
+            payload: undefined
+        };
+        const onActionCallback = jest.fn();
+
+        const myPlugin = () => bucket => {
+            bucket.onAction(onActionCallback);
+        };
+
+        const plugins = [myPlugin()];
+        const bucket = createBucket({
+            states: {
+                id: 1
+            },
+            actions: {
+                SET_ID() {
+                    // do nothing
+                }
+            },
+            plugins
+        });
+
+        expect(bucket._pluginSubscribers).toEqual(plugins);
+        expect(bucket._pluginSubscribers.length).toBe(1);
+        expect(bucket._onActionSubscribers.size).toBe(1);
+
+        bucket.dispatch("SET_ID");
+        expect(onMutationSpy).toHaveBeenCalled();
+        expect(onMutationSpy).toHaveBeenCalledTimes(1);
+        expect(onMutationSpy).toHaveBeenCalledWith("actions", actionMock);
+
+        expect(onActionCallback).toHaveBeenCalled();
+        expect(onActionCallback).toHaveBeenCalledWith(actionMock);
     });
 });

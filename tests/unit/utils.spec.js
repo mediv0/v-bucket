@@ -162,4 +162,24 @@ describe("utils.js", () => {
     it("isObjectEmpty should return false if object is not empty", () => {
         expect(utils.isObjectEmpty({ a: 1 })).toBe(false);
     });
+
+    it("hasPlugin should return true if the passing array is not falsy and has value type of function", () => {
+        // v-bucket plugins return another function when called
+        let fn1 = () => () => {};
+        let fn2 = () => () => {};
+        expect(utils.hasPlugin([fn1(), fn2()])).toBe(true);
+        expect(utils.hasPlugin([fn1, fn2])).toBe(true);
+    });
+
+    it("hasPlugin should return false if the passing argument is falsy and no type of function", () => {
+        let fn1 = () => {};
+        let fn2 = () => {};
+        expect(utils.hasPlugin([fn1(), fn2()])).toBe(false);
+        expect(utils.hasPlugin([])).toBe(false);
+        expect(utils.hasPlugin()).toBe(false);
+        expect(utils.hasPlugin(1)).toBe(false);
+        expect(utils.hasPlugin(1, fn1(), fn2())).toBe(false);
+        expect(utils.hasPlugin("test")).toBe(false);
+        expect(utils.hasPlugin(undefined)).toBe(false);
+    });
 });
