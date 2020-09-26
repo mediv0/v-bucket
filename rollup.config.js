@@ -82,7 +82,11 @@ function createEntry(config) {
     }
 
     if (config.transpile !== false) {
-        c.plugins.push(buble());
+        c.plugins.push(
+            buble({
+                objectAssign: "Object.assign"
+            })
+        );
     }
 
     c.plugins.push(resolve());
