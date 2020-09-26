@@ -1,43 +1,53 @@
 # v-bucket [![Codecov Coverage](https://img.shields.io/codecov/c/github/mediv0/v-bucket/coverage.svg?style=flat-square)](https://codecov.io/gh/mediv0/v-bucket) [![Code Grade](https://www.code-inspector.com/project/13923/status/svg)](https://www.code-inspector.com/project/13923/status/svg) [![maintainability](https://img.shields.io/codeclimate/maintainability/mediv0/v-bucket)](https://img.shields.io/codeclimate/maintainability/mediv0/v-bucket) [![License](https://img.shields.io/github/license/mediv0/v-bucket)](https://img.shields.io/github/license/mediv0/v-bucket)
+
 > 📦 Fast, Simple, and Lightweight State Management for Vue 3.0 built with composition API, inspired by Vuex.
 
 <p align="center">
   <img width="500px" src="https://i.imgur.com/6wQ0GRr.png">
 </p>
 
-## Content Table
+## Table of Contents
 
-- [installation](#installation)
-- [usage](#usage)
-- [using with composition api]("#using-with-composition-api")
-- [using with option api]("#using-with-option-api")
--------
-- [states](#states)
-- [mutations](#mutations)
-- [getters](#getters)
-- [actions](#actions)
-- [modules](#modules)
-- [how to access module states](#how-to-access-module-states)
-- [how to access module getters](#how-to-access-module-getters)
-- [how to access module mutations](#how-to-access-module-mutations)
-- [how to access module actions](#how-to-access-module-actions)
+### Main features
 
+-   [installation](#installation)
+-   [usage](#usage)
+-   [using with composition api]("#using-with-composition-api")
+-   [using with option api]("#using-with-option-api")
+-   [states](#states)
+-   [mutations](#mutations)
+-   [getters](#getters)
+-   [actions](#actions)
+-   [modules](#modules)
+
+### Access modules
+
+-   [how to access module states](#how-to-access-module-states)
+-   [how to access module getters](#how-to-access-module-getters)
+-   [how to access module mutations](#how-to-access-module-mutations)
+-   [how to access module actions](#how-to-access-module-actions)
+
+### Advanced
+
+-   [plugins](#plugins)
+-   [plugin hooks](#plugin-hooks)
 
 ## Examples
 
-- [CodeSandbox](https://codesandbox.io/s/dank-waterfall-mrfzq)
-- [Counter](https://github.com/mediv0/v-bucket/blob/master/examples/components/counter.vue)
-- [Shopping Cart](https://github.com/mediv0/v-bucket/blob/master/examples/components/shop.vue)
+-   [CodeSandbox](https://codesandbox.io/s/dank-waterfall-mrfzq)
+-   [Counter](https://github.com/mediv0/v-bucket/blob/master/examples/components/counter.vue)
+-   [Shopping Cart](https://github.com/mediv0/v-bucket/blob/master/examples/components/shop.vue)
 
 Running the examples:
 
-``` bash
+```bash
 $ npm run dev
 $ yarn dev
 ```
+
 ## Running tests
 
-``` bash
+```bash
 $ npm run test
 $ yarn test
 ```
@@ -45,11 +55,14 @@ $ yarn test
 ## installation
 
 install this package from NPM:
-``` bash
+
+```bash
 $ npm install @mediv0/v-bucket
 ```
+
 or yarn:
-``` bash
+
+```bash
 $ yarn add @mediv0/v-bucket
 ```
 
@@ -77,6 +90,7 @@ const bucket = createBucket({
 });
 export default bucket;
 ```
+
 then import it in your app entry point, main.js like this:
 
 ```javascript
@@ -88,7 +102,6 @@ import bucket from "./bucket/index";
 createApp(App)
     .use(bucket)
     .mount("#app");
-
 ```
 
 ## using with composition api
@@ -102,7 +115,7 @@ export default {
     setup() {
         // get access to the v-bucket
         const bucket = useBucket();
-        
+
         // ...
 
         return {
@@ -123,19 +136,20 @@ export default {
     mounted() {
         // accessing bucket on this
         this.$bucket
-        
+
         // ...
     },
     methods: {
       click() {
         this.$bucket.commit("SET_ID", this.id);
-        
+
         // ...
       }
     }
 };
 </script>
 ```
+
 _you only import useBucket when you want to use it inside setup() function_
 
 ## states
@@ -148,9 +162,9 @@ accessing states:
  mounted() {
     // accessing id state in the root level
     this.$bucket.state.id
-    
+
     // ...
-    
+
     // accessing name state in the nested tree
     this.$bucket.state.module1.name
  },
@@ -179,15 +193,17 @@ const bucket = createBucket({
 });
 export default bucket;
 ```
+
 **NOTE:** states object will be reactive by default. that means they will react to changes and update based on it.
 
-**NOTE:** it's better to use mutations or getters to access states.  
+**NOTE:** it's better to use mutations or getters to access states.
 
 ## mutations
 
 use mutations when you need to change a state value, all mutations will take 2 parameter:
-- state
-- payload
+
+-   state
+-   payload
 
 ```javascript
 const bucket = createBucket({
@@ -196,6 +212,7 @@ const bucket = createBucket({
     },
 });
 ```
+
 with **state**, you can have access to states object and change its value by passing **payload**.
 
 **NOTE:** payload is optional.
@@ -224,14 +241,14 @@ you can't access mutations directly. you have to call them with commit method. l
 ```javascript
 methods: {
    click() {
-   
+
      this.$bucket.commit("SET_ID", 5);
      this.$bucket.state.id // must be 5 now!
-     
+
      // ...
-     
+
      this.$bucket.commit("SET_ID"); // calling without a payload
-     
+
    }
  }
 ```
@@ -256,16 +273,17 @@ const bucket = createBucket({
 ```
 
 all getters will take 1 parameter:
-- state (used to access states object)
+
+-   state (used to access states object)
 
 using it in your vue app:
 
 ```javascript
 methods: {
    click() {
-   
+
      this.$bucket.getters["GET_ID"] // will return id state
-     
+
      // ...
    }
  }
@@ -274,8 +292,9 @@ methods: {
 ## actions
 
 Actions are like mutations. the difference is:
-- They can handle asynchronous operations
-- Instead of mutating the state, actions commit mutations.
+
+-   They can handle asynchronous operations
+-   Instead of mutating the state, actions commit mutations.
 
 ```javascript
 const bucket = createBucket({
@@ -291,7 +310,7 @@ const bucket = createBucket({
       increment(context) {
         context.commit("increment");
       }
-      
+
       // or using argument destructuring to simplify the code.
       anotherAction({ commit }) {
         // do some action!
@@ -321,11 +340,11 @@ also you can't access actions directly. you have to call them with dispatch meth
 ```javascript
 methods: {
    click() {
-   
+
      this.$bucket.dispatch("increment") // will call increment action
-     
+
      // ...
-     
+
    }
  }
 ```
@@ -335,7 +354,8 @@ methods: {
 ## modules
 
 from vuex docs:
-- _Due to using a single state tree, all states of our application are contained inside one big object. However, as our application grows in scale, the store can get really bloated. To help with that, Vuex allows us to divide our store into **modules**._
+
+-   _Due to using a single state tree, all states of our application are contained inside one big object. However, as our application grows in scale, the store can get really bloated. To help with that, Vuex allows us to divide our store into **modules**._
 
 ```javascript
 const moduleA = {
@@ -373,10 +393,10 @@ all modules will be installed under the root module. so by accessing the root st
 ```javascript
 methods: {
    click() {
-   
+
      this.$bucket.state.moduleA.name // `moduleA`'s name state
      this.$bucket.state.moduleB.id // `moduleB`'s id state
-     
+
      // ...
    }
  }
@@ -389,18 +409,19 @@ if you remember we used bracket notation to access getters, you can access your 
 ```javascript
 methods: {
    click() {
-     
+
      this.$bucket.getters["moduleA/get_id"]; // `moduleA`'s getter
      this.$bucket.getters["moduleB/get_name]; // `moduleB`'s name state
-     
+
      // you can go deep as many levels as you want
-     this.$bucket.getters["moduleA/moduleB/moduleC/moduleH/...]; 
-     
-     
+     this.$bucket.getters["moduleA/moduleB/moduleC/moduleH/...];
+
+
      // ...
    }
  }
 ```
+
 they above code represent something like this:
 
 -root
@@ -409,7 +430,6 @@ they above code represent something like this:
 
 -----moduleB
 
-
 ## how to access module mutations
 
 mutations are like getters, you can access your module's mutation by defining its path. like this:
@@ -417,10 +437,10 @@ mutations are like getters, you can access your module's mutation by defining it
 ```javascript
 methods: {
    click() {
-   
+
      this.$bucket.commit("moduleA/set_id"); // we can access mutations by commit()
      this.$bucket.commit("moduleB/set_name); // we can access mutations by commit()
-     
+
      // ...
    }
  }
@@ -433,10 +453,10 @@ actions are like getters, you can access your module's actions by defining its p
 ```javascript
 methods: {
    click() {
-   
+
      this.$bucket.dispatch("moduleA/set_id"); // we can access mutations by dispatch()
      this.$bucket.dispatch("moduleB/set_name); // we can access mutations by dispatch()
-     
+
      // ...
    }
  }
@@ -444,7 +464,7 @@ methods: {
 
 sometimes you need to access another module's mutation or action within the current module
 
-since the context parameter refer to the root module,  you can access all of your modules by defining their path. like this:
+since the context parameter refer to the root module, you can access all of your modules by defining their path. like this:
 
 ```javascript
 // inside module a
@@ -456,7 +476,7 @@ const moduleA = {
     dispatchModuleB(context) {
       context.dispatch("moduleB/request"); // dispatching in module b from module a
     }
-    
+
     dispatchRoot(context) {
       context.dispatch("rootMutation") //  dispatching in root from module a
     }
@@ -467,9 +487,108 @@ const moduleA = {
 
 **NOTE:** if you want to access a module from another module like example, you need to define your paths from root
 
+## plugins
+
+v-bucket store accept the plugins option that exposes hooks for each mutation and actions. plugins will allow you to extend the functionality of v-bucket
+
+a hello world plugin
+
+```javascript
+const helloWorld = () => {
+    // called when the store is initialized
+    console.log("hello world");
+    return bucket => {
+        // access bucket store
+    };
+};
+
+export const bucket = createBucket({
+    // other options
+    // ...
+    plugins: [helloWorld()]
+});
+```
+
+the function that has the responsibility to be a plugin, need to return another function.
+v-bucket will use that function to expose the root module and its hooks
+
+
+## plugin hooks
+
+there are two hooks available:
+
+#### bucket.onMutation(callback(mutation))
+
+this function will be called after every mutation.
+also, it will return information about the mutation that has been fired.
+
+this information contains: name, module and full path of that mutation.
+
+#### bucket.onAction(callback(action))
+
+this function will be called after every action.
+also, it will return information about the action that has been fired.
+
+this information contains: name, module and full path of that action.
+
+**usage:**
+
+```javascript
+const myPlugin = socket => {
+    return bucket => {
+        socket.on("data", data => {
+            store.commit("receiveData", data);
+        });
+        store.onMutation(mutation => {
+            if ((mutation.name = "UPDATE_DATA")) {
+                socket.emit("update", mutation.payload);
+            }
+        });
+    };
+};
+```
+
+if you want use Class syntaxt, no worries! do something like this:
+
+```javascript
+Class Snapshot {
+  // other methods and options
+  // ...
+  constructor() {
+    this.snapshots = [];
+  }
+
+  plugin() {
+    return bucket => {
+      bucket.onMutation(mutation => {
+        if (mutation.name = "UPDATE_SNAPSHOT") {
+          this.snapshots.push(mutation.payload);
+        }
+      })
+    }
+  }
+}
+```
+
+easy right?
+
+and use it like this in your store:
+
+```javascript
+export const bucket = createBucket({
+    // other options
+    // ...
+    plugins: [new Snapshot().plugin()]
+});
+```
+
+Since you have access to the bucket root module in the plugins, you also able to commit, dispatch and use getters.
+
 ## Contribution
 
 Please make sure to read the [Contributing Guide](https://github.com/mediv0/v-bucket/blob/master/.github/contributing.md) before making a pull request.
+
+**feel free to request new features!**
 
 ## License
 
@@ -477,7 +596,7 @@ Please make sure to read the [Contributing Guide](https://github.com/mediv0/v-bu
 
 ## Todo
 
-- [ ] mapGetters
-- [ ] mapActions
-- [ ] optimization and refactoring
-- and more....
+-   [ ] mapGetters
+-   [ ] mapActions
+-   [ ] optimization and refactoring
+-   and more....
