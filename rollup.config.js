@@ -5,7 +5,7 @@ import { terser } from "rollup-plugin-terser";
 import pkg from "./package.json";
 
 const banner = `/*!
- * vbucket v${pkg.version}
+ * v-bucket v${pkg.version}
  * (c) ${new Date().getFullYear()} Mahdi Fakhr
  * @license MIT
  */`;
