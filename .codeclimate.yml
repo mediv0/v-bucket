@@ -2,3 +2,6 @@ exclude_patterns:
 - "rollup.config.js"
 - "./tests"
 - "./scripts/build.js"
+- "./dist"
+- "./node_modules"
+- "./examples"
