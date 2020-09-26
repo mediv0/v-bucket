@@ -2,6 +2,8 @@
 node_modules
 .vscode
 coverage
+examples
+/examples
 
 
 # local env files
