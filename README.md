@@ -1,5 +1,7 @@
 # v-bucket [![Codecov Coverage](https://img.shields.io/codecov/c/github/mediv0/v-bucket/coverage.svg?style=flat-square)](https://codecov.io/gh/mediv0/v-bucket) [![Code Grade](https://www.code-inspector.com/project/13923/status/svg)](https://www.code-inspector.com/project/13923/status/svg) [![Maintainability](https://api.codeclimate.com/v1/badges/1b4471bc8538eb0a2e67/maintainability)](https://codeclimate.com/github/mediv0/v-bucket/maintainability) [![License](https://img.shields.io/github/license/mediv0/v-bucket)](https://img.shields.io/github/license/mediv0/v-bucket)
 
+**NPM STATUS:** [![npm](https://img.shields.io/npm/v/@mediv0/v-bucket?style=plastic)](https://img.shields.io/npm/v/@mediv0/v-bucket?style=plastic) [![size](https://img.shields.io/bundlephobia/minzip/@mediv0/v-bucket)](https://img.shields.io/bundlephobia/minzip/@mediv0/v-bucket) [![download](https://img.shields.io/npm/dt/@mediv0/v-bucket)](https://img.shields.io/npm/dt/@mediv0/v-bucket)
+
 > 📦 Fast, Simple, and Lightweight State Management for Vue 3.0 built with composition API, inspired by Vuex.
 
 <p align="center">
