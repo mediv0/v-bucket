@@ -78,7 +78,8 @@ export class Bucket {
             `);
         }
         _fn(module._data, _payload);
-        this.notifyPlugins("mutation", {
+
+        this.notifyCommits({
             name: actionName,
             module: this._name,
             fullPath: `root/${_name}`,
@@ -104,7 +105,7 @@ export class Bucket {
             return _asyncDispatch;
         }
 
-        this.notifyPlugins("actions", {
+        this.notifyActions({
             name: actionName,
             module: this._name,
             fullPath: `root/${_name}`,
@@ -123,6 +124,7 @@ export class Bucket {
         return this._getters;
     }
 
+    // refactor: create multiple functions for if-else
     interceptGetters(_self, _target) {
         // finding correct getter recursively from root to bottom
         return new Proxy(_target, {
@@ -198,14 +200,19 @@ export class Bucket {
         return _plugins;
     }
 
-    notifyPlugins(_type, _value) {
-        // maybe use ENUMS idk!
-        const _callbackFns =
-            _type === "mutation"
-                ? this._onMutationSubscribers
-                : this._onActionSubscribers;
-        [..._callbackFns.values()].forEach(cb => {
-            cb(_value);
+    notifyCommits(_data) {
+        const _cbs = this._onMutationSubscribers;
+        this.notifyPlugins(_data, _cbs);
+    }
+
+    notifyActions(_data) {
+        const _cbs = this._onActionSubscribers;
+        this.notifyPlugins(_data, _cbs);
+    }
+
+    notifyPlugins(_data, _cbs) {
+        [..._cbs.values()].forEach(cb => {
+            cb(_data);
         });
     }
 
