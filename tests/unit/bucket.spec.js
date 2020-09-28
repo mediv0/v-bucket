@@ -509,7 +509,6 @@ describe("bucket.js", () => {
 
     it("committing a mutation should notify onMutation hooks", () => {
         const onMutationSpy = jest.spyOn(Bucket.prototype, "notifyPlugins");
-        const notifyCommits = jest.spyOn(Bucket.prototype, "notifyCommits");
 
         const mutationMock = {
             name: "SET_ID",
@@ -522,9 +521,6 @@ describe("bucket.js", () => {
         const myPlugin = () => bucket => {
             bucket.onMutation(onMutationCallback);
         };
-
-        const mutationSubscribers = new Set();
-        mutationSubscribers.add(onMutationCallback);
 
         const plugins = [myPlugin()];
         const bucket = createBucket({
@@ -546,19 +542,15 @@ describe("bucket.js", () => {
         bucket.commit("SET_ID");
         expect(onMutationSpy).toHaveBeenCalled();
         expect(onMutationSpy).toHaveBeenCalledTimes(1);
-        expect(onMutationSpy).toHaveBeenCalledWith(
-            mutationMock,
-            mutationSubscribers
-        );
-        expect(notifyCommits).toHaveBeenCalledWith(mutationMock);
+        expect(onMutationSpy).toHaveBeenCalledWith("mutation", mutationMock);
+
         expect(onMutationCallback).toHaveBeenCalled();
         expect(onMutationCallback).toHaveBeenCalledWith(mutationMock);
         onMutationSpy.mockClear();
     });
 
     it("dispatching an action should notify onAction hooks", () => {
-        const onActionSpy = jest.spyOn(Bucket.prototype, "notifyPlugins");
-        const notifyActions = jest.spyOn(Bucket.prototype, "notifyActions");
+        const onMutationSpy = jest.spyOn(Bucket.prototype, "notifyPlugins");
 
         const actionMock = {
             name: "SET_ID",
@@ -571,9 +563,6 @@ describe("bucket.js", () => {
         const myPlugin = () => bucket => {
             bucket.onAction(onActionCallback);
         };
-
-        const actionSubscribers = new Set();
-        actionSubscribers.add(onActionCallback);
 
         const plugins = [myPlugin()];
         const bucket = createBucket({
@@ -593,10 +582,10 @@ describe("bucket.js", () => {
         expect(bucket._onActionSubscribers.size).toBe(1);
 
         bucket.dispatch("SET_ID");
-        expect(onActionSpy).toHaveBeenCalled();
-        expect(onActionSpy).toHaveBeenCalledTimes(1);
-        expect(onActionSpy).toHaveBeenCalledWith(actionMock, actionSubscribers);
-        expect(notifyActions).toHaveBeenCalledWith(actionMock);
+        expect(onMutationSpy).toHaveBeenCalled();
+        expect(onMutationSpy).toHaveBeenCalledTimes(1);
+        expect(onMutationSpy).toHaveBeenCalledWith("actions", actionMock);
+
         expect(onActionCallback).toHaveBeenCalled();
         expect(onActionCallback).toHaveBeenCalledWith(actionMock);
     });
