@@ -5,7 +5,6 @@ import {
     arrayToPath
 } from "./utils";
 import { ModuleNotFound } from "./Errors";
-
 export function searchNestedModules(path, bucket) {
     // if the path already calculated. there is no need to do it again
     const _nodes = (isPathAlreadyCalculated(path) && path) || parsePath(path);
