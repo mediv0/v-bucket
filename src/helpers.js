@@ -51,7 +51,6 @@ export function createStateTree(_root) {
                 _root._states[key] = val._states;
             });
         }
-    } else {
-        return;
     }
+    return;
 }
