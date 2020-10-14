@@ -192,7 +192,6 @@ function hasPlugin(arr) {
 function searchNestedModules(path, bucket) {
     // if the path already calculated. there is no need to do it again
     var _nodes = (isPathAlreadyCalculated(path) && path) || parsePath(path);
-
     var _lastModuleName = "root";
     // if the user just provide a name but not a valid path, we return the root instance
     if (_nodes.length === 1 && isStringNotEmpty(_nodes)) {
@@ -206,31 +205,24 @@ function searchNestedModules(path, bucket) {
     // iterate over the modules tree to find the current module
     for (var i = 0; _nodes.length > 1; i++) {
         // remove visited module
-        var _nextPath = _nodes.shift();
-        _lastModuleName = _nextPath;
+        _lastModuleName = _nodes.shift();
         // get nested module if there is any
-        _currentModule = _currentModule._modulesDictionary.get(_nextPath);
+        _currentModule = _currentModule._modulesDictionary.get(_lastModuleName);
         if (!_currentModule) {
             throw new ModuleNotFound(
                 "We couldn't find your requested module. path: " +
                     path +
                     " # module: " +
-                    _nextPath
+                    _lastModuleName
             );
         }
     }
-
-    /*
-            we use slice to prevent mutation
-    */
-    var actionName = _nodes.slice(-1).toString();
-    var nextModuleName = _lastModuleName;
-    var nextPath = arrayToPath.apply(void 0, _nodes);
     return {
         module: _currentModule,
-        actionName: actionName,
-        nextModuleName: nextModuleName,
-        nextPath: nextPath
+        // we use slice to prevent mutation
+        actionName: _nodes.slice(-1).toString(),
+        nextModuleName: _lastModuleName,
+        nextPath: arrayToPath.apply(void 0, _nodes)
     };
 }
 
@@ -259,39 +251,14 @@ var Bucket = function Bucket(opts) {
                 " as your root module. please provide a valid object format\n                    your object should contain [states, mutations, actions, getters, modules]\n                "
         );
     }
-    var name = opts.name;
-    var states = opts.states;
-    var mutations = opts.mutations;
-    var actions = opts.actions;
-    var getters = opts.getters;
-    var modules = opts.modules;
-    var plugins = opts.plugins;
     var _root = this;
-
-    // internal variables
-    this._name = name || "root";
-    this._data = vue.reactive(states);
-    this._mutations = mutations || Object.create(null);
-    this._getters = this.interceptGetters(
-        _root,
-        getters || Object.create(null)
-    );
-    this._actions = actions || Object.create(null);
-    this._modules = modules || Object.create(null);
-    this._states = Object.create(null);
-    this._modulesDictionary = new Map();
-    this._onMutationSubscribers = new Set();
-    this._onActionSubscribers = new Set();
-    this._pluginSubscribers = this.installPlugins(plugins);
-
+    this.initializeSettings(opts);
     this.commit = function boundCommit(_name, _payload) {
         return _root.triggerCommit(_name, _payload);
     };
-
     this.dispatch = function boundDispatch(_name, _payload) {
         return _root.triggerDispatch(_root, _name, _payload);
     };
-
     this.installModules();
     createStateTree(_root);
 };
@@ -299,6 +266,29 @@ var Bucket = function Bucket(opts) {
 var prototypeAccessors = {
     state: { configurable: true },
     getters: { configurable: true }
+};
+
+Bucket.prototype.initializeSettings = function initializeSettings(ref) {
+    var name = ref.name;
+    var states = ref.states;
+    var mutations = ref.mutations;
+    var actions = ref.actions;
+    var getters = ref.getters;
+    var modules = ref.modules;
+    var plugins = ref.plugins;
+
+    // internal variables
+    this._name = name || "root";
+    this._data = vue.reactive(states);
+    this._mutations = mutations || Object.create(null);
+    this._getters = this.interceptGetters(this, getters || Object.create(null));
+    this._actions = actions || Object.create(null);
+    this._modules = modules || Object.create(null);
+    this._states = Object.create(null);
+    this._modulesDictionary = new Map();
+    this._onMutationSubscribers = new Set();
+    this._onActionSubscribers = new Set();
+    this._pluginSubscribers = this.installPlugins(plugins);
 };
 
 Bucket.prototype.triggerCommit = function triggerCommit(_name, _payload) {
@@ -318,7 +308,8 @@ Bucket.prototype.triggerCommit = function triggerCommit(_name, _payload) {
         );
     }
     _fn(module._data, _payload);
-    this.notifyPlugins("mutation", {
+
+    this.notifyCommits({
         name: actionName,
         module: this._name,
         fullPath: "root/" + _name,
@@ -346,17 +337,18 @@ Bucket.prototype.triggerDispatch = function triggerDispatch(
         );
     }
     var _asyncDispatch = _fn(_self, _payload);
-    // if is current dispatch fn doing an asynchronous task, return it to the user
-    if (isPromise(_asyncDispatch)) {
-        return _asyncDispatch;
-    }
 
-    this.notifyPlugins("actions", {
+    this.notifyActions({
         name: actionName,
         module: this._name,
         fullPath: "root/" + _name,
         payload: _payload
     });
+
+    // if is current dispatch fn doing an asynchronous task, return it to the user
+    if (isPromise(_asyncDispatch)) {
+        return _asyncDispatch;
+    }
 };
 
 prototypeAccessors.state.get = function() {
@@ -370,6 +362,7 @@ prototypeAccessors.getters.get = function() {
     return this._getters;
 };
 
+// refactor: create multiple functions for if-else
 Bucket.prototype.interceptGetters = function interceptGetters(_self, _target) {
     // finding correct getter recursively from root to bottom
     return new Proxy(_target, {
@@ -457,14 +450,19 @@ Bucket.prototype.installPlugins = function installPlugins(_plugins) {
     return _plugins;
 };
 
-Bucket.prototype.notifyPlugins = function notifyPlugins(_type, _value) {
-    // maybe use ENUMS idk!
-    var _callbackFns =
-        _type === "mutation"
-            ? this._onMutationSubscribers
-            : this._onActionSubscribers;
-    [].concat(_callbackFns.values()).forEach(function(cb) {
-        cb(_value);
+Bucket.prototype.notifyCommits = function notifyCommits(_data) {
+    var _cbs = this._onMutationSubscribers;
+    this.notifyPlugins(_data, _cbs);
+};
+
+Bucket.prototype.notifyActions = function notifyActions(_data) {
+    var _cbs = this._onActionSubscribers;
+    this.notifyPlugins(_data, _cbs);
+};
+
+Bucket.prototype.notifyPlugins = function notifyPlugins(_data, _cbs) {
+    [].concat(_cbs.values()).forEach(function(cb) {
+        cb(_data);
     });
 };
 

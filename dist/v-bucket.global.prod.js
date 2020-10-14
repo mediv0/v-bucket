@@ -50,7 +50,7 @@ var vbucket = (function(t) {
                 e
             );
         })(Error),
-        a = (function(t) {
+        s = (function(t) {
             function e(e) {
                 t.call(this, e), (this.name = "InvalidDispatchException");
             }
@@ -61,7 +61,7 @@ var vbucket = (function(t) {
                 e
             );
         })(Error),
-        c = (function(t) {
+        a = (function(t) {
             function e(e, n) {
                 t.call(this, e),
                     (this.name = "InvalidGetterException"),
@@ -82,7 +82,7 @@ var vbucket = (function(t) {
                 e
             );
         })(Error),
-        s = (function(t) {
+        c = (function(t) {
             function e(e) {
                 t.call(this, e),
                     (this.name = "InstallPluginsOnModulesException");
@@ -126,16 +126,14 @@ var vbucket = (function(t) {
             o = "root";
         if (1 === n.length && n.toString().trim().length > 0)
             return { module: e, actionName: t };
-        for (var i = e, a = 0; n.length > 1; a++) {
-            var c = n.shift();
-            if (((o = c), !(i = i._modulesDictionary.get(c))))
+        for (var i = e, s = 0; n.length > 1; s++)
+            if (((o = n.shift()), !(i = i._modulesDictionary.get(o))))
                 throw new r(
                     "We couldn't find your requested module. path: " +
                         t +
                         " # module: " +
-                        c
+                        o
                 );
-        }
         return {
             module: i,
             actionName: n.slice(-1).toString(),
@@ -143,40 +141,20 @@ var vbucket = (function(t) {
             nextPath: p.apply(void 0, n)
         };
     }
-    var m = function(e) {
-            if (!e || !(e instanceof Object) || h(e))
+    var m = function(t) {
+            if (!t || !(t instanceof Object) || h(t))
                 throw new n(
                     "\n                    you are passing " +
-                        e +
+                        t +
                         " as your root module. please provide a valid object format\n                    your object should contain [states, mutations, actions, getters, modules]\n                "
                 );
-            var o = e.name,
-                r = e.states,
-                i = e.mutations,
-                a = e.actions,
-                c = e.getters,
-                s = e.modules,
-                u = e.plugins,
-                l = this;
-            (this._name = o || "root"),
-                (this._data = t.reactive(r)),
-                (this._mutations = i || Object.create(null)),
-                (this._getters = this.interceptGetters(
-                    l,
-                    c || Object.create(null)
-                )),
-                (this._actions = a || Object.create(null)),
-                (this._modules = s || Object.create(null)),
-                (this._states = Object.create(null)),
-                (this._modulesDictionary = new Map()),
-                (this._onMutationSubscribers = new Set()),
-                (this._onActionSubscribers = new Set()),
-                (this._pluginSubscribers = this.installPlugins(u)),
-                (this.commit = function(t, e) {
-                    return l.triggerCommit(t, e);
+            var e = this;
+            this.initializeSettings(t),
+                (this.commit = function(t, n) {
+                    return e.triggerCommit(t, n);
                 }),
-                (this.dispatch = function(t, e) {
-                    return l.triggerDispatch(l, t, e);
+                (this.dispatch = function(t, n) {
+                    return e.triggerDispatch(e, t, n);
                 }),
                 this.installModules(),
                 (function(t) {
@@ -186,26 +164,49 @@ var vbucket = (function(t) {
                             t._modulesDictionary.forEach(function(e, n) {
                                 t._states[n] = e._states;
                             }));
-                })(l);
+                })(e);
         },
         d = { state: { configurable: !0 }, getters: { configurable: !0 } };
     return (
+        (m.prototype.initializeSettings = function(e) {
+            var n = e.name,
+                o = e.states,
+                r = e.mutations,
+                i = e.actions,
+                s = e.getters,
+                a = e.modules,
+                c = e.plugins;
+            (this._name = n || "root"),
+                (this._data = t.reactive(o)),
+                (this._mutations = r || Object.create(null)),
+                (this._getters = this.interceptGetters(
+                    this,
+                    s || Object.create(null)
+                )),
+                (this._actions = i || Object.create(null)),
+                (this._modules = a || Object.create(null)),
+                (this._states = Object.create(null)),
+                (this._modulesDictionary = new Map()),
+                (this._onMutationSubscribers = new Set()),
+                (this._onActionSubscribers = new Set()),
+                (this._pluginSubscribers = this.installPlugins(c));
+        }),
         (m.prototype.triggerCommit = function(t, e) {
             var n = f(t, this),
                 o = n.module,
                 r = n.actionName,
-                a = n.nextModuleName,
-                c = o._mutations[r];
-            if (!c)
+                s = n.nextModuleName,
+                a = o._mutations[r];
+            if (!a)
                 throw new i(
                     "\n                commit " +
                         r +
                         " in " +
-                        (a || "root") +
+                        (s || "root") +
                         " module is invalid. please check your commit name.\n            "
                 );
-            c(o._data, e),
-                this.notifyPlugins("mutation", {
+            a(o._data, e),
+                this.notifyCommits({
                     name: r,
                     module: this._name,
                     fullPath: "root/" + t,
@@ -216,30 +217,30 @@ var vbucket = (function(t) {
             var o = f(e, this),
                 r = o.module,
                 i = o.actionName,
-                c = o.nextModuleName,
-                s = r._actions[i];
-            if (!s)
-                throw new a(
+                a = o.nextModuleName,
+                c = r._actions[i];
+            if (!c)
+                throw new s(
                     "\n                dispatch " +
                         i +
                         " in " +
-                        (c || "root") +
+                        (a || "root") +
                         " module is invalid. please check your commit name.\n            "
                 );
             var u,
-                l = s(t, n);
+                l = c(t, n);
             if (
+                (this.notifyActions({
+                    name: i,
+                    module: this._name,
+                    fullPath: "root/" + e,
+                    payload: n
+                }),
                 null != (u = l) &&
-                "function" == typeof u.then &&
-                "function" == typeof u.catch
+                    "function" == typeof u.then &&
+                    "function" == typeof u.catch)
             )
                 return l;
-            this.notifyPlugins("actions", {
-                name: i,
-                module: this._name,
-                fullPath: "root/" + e,
-                payload: n
-            });
         }),
         (d.state.get = function() {
             return (
@@ -258,17 +259,17 @@ var vbucket = (function(t) {
                     var r = u(o);
                     if (r.length > 1) {
                         var i = f(r, e),
-                            a = i.module,
-                            s = i.nextModuleName,
+                            s = i.module,
+                            c = i.nextModuleName,
                             l = i.nextPath;
-                        return (c.namespace = s), a.getters[l];
+                        return (a.namespace = c), s.getters[l];
                     }
                     if (!n[o])
-                        throw new c(
+                        throw new a(
                             "\n                            getter " +
                                 o +
                                 " in " +
-                                (c.namespace || "root") +
+                                (a.namespace || "root") +
                                 " module is not found. please check your getter.\n                        "
                         );
                     return t.computed(function() {
@@ -298,7 +299,7 @@ var vbucket = (function(t) {
                         return "function" == typeof t;
                     }))
             )
-                throw new s(
+                throw new c(
                     "\n                You can only register plugins in the root module."
                 );
             return void 0 === t || h(t)
@@ -314,13 +315,17 @@ var vbucket = (function(t) {
                   }),
                   t);
         }),
+        (m.prototype.notifyCommits = function(t) {
+            var e = this._onMutationSubscribers;
+            this.notifyPlugins(t, e);
+        }),
+        (m.prototype.notifyActions = function(t) {
+            var e = this._onActionSubscribers;
+            this.notifyPlugins(t, e);
+        }),
         (m.prototype.notifyPlugins = function(t, e) {
-            var n =
-                "mutation" === t
-                    ? this._onMutationSubscribers
-                    : this._onActionSubscribers;
-            [].concat(n.values()).forEach(function(t) {
-                t(e);
+            [].concat(e.values()).forEach(function(e) {
+                e(t);
             });
         }),
         (m.prototype.install = function(t, n) {

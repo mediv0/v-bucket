@@ -40,7 +40,7 @@ var r = (function(t) {
             e
         );
     })(Error),
-    c = (function(t) {
+    s = (function(t) {
         function e(e) {
             t.call(this, e), (this.name = "InvalidCommitException");
         }
@@ -51,7 +51,7 @@ var r = (function(t) {
             e
         );
     })(Error),
-    s = (function(t) {
+    c = (function(t) {
         function e(e) {
             t.call(this, e), (this.name = "InvalidDispatchException");
         }
@@ -126,16 +126,14 @@ function d(t, e) {
         o = "root";
     if (1 === n.length && n.toString().trim().length > 0)
         return { module: e, actionName: t };
-    for (var r = e, i = 0; n.length > 1; i++) {
-        var c = n.shift();
-        if (((o = c), !(r = r._modulesDictionary.get(c))))
+    for (var r = e, i = 0; n.length > 1; i++)
+        if (((o = n.shift()), !(r = r._modulesDictionary.get(o))))
             throw new a(
                 "We couldn't find your requested module. path: " +
                     t +
                     " # module: " +
-                    c
+                    o
             );
-    }
     return {
         module: r,
         actionName: n.slice(-1).toString(),
@@ -143,40 +141,20 @@ function d(t, e) {
         nextPath: f.apply(void 0, n)
     };
 }
-var _ = function(t) {
+var y = function(t) {
         if (!t || !(t instanceof Object) || m(t))
             throw new r(
                 "\n                    you are passing " +
                     t +
                     " as your root module. please provide a valid object format\n                    your object should contain [states, mutations, actions, getters, modules]\n                "
             );
-        var n = t.name,
-            o = t.states,
-            i = t.mutations,
-            a = t.actions,
-            c = t.getters,
-            s = t.modules,
-            u = t.plugins,
-            l = this;
-        (this._name = n || "root"),
-            (this._data = e(o)),
-            (this._mutations = i || Object.create(null)),
-            (this._getters = this.interceptGetters(
-                l,
-                c || Object.create(null)
-            )),
-            (this._actions = a || Object.create(null)),
-            (this._modules = s || Object.create(null)),
-            (this._states = Object.create(null)),
-            (this._modulesDictionary = new Map()),
-            (this._onMutationSubscribers = new Set()),
-            (this._onActionSubscribers = new Set()),
-            (this._pluginSubscribers = this.installPlugins(u)),
-            (this.commit = function(t, e) {
-                return l.triggerCommit(t, e);
+        var e = this;
+        this.initializeSettings(t),
+            (this.commit = function(t, n) {
+                return e.triggerCommit(t, n);
             }),
-            (this.dispatch = function(t, e) {
-                return l.triggerDispatch(l, t, e);
+            (this.dispatch = function(t, n) {
+                return e.triggerDispatch(e, t, n);
             }),
             this.installModules(),
             (function(t) {
@@ -186,42 +164,62 @@ var _ = function(t) {
                         t._modulesDictionary.forEach(function(e, n) {
                             t._states[n] = e._states;
                         }));
-            })(l);
+            })(e);
     },
-    y = { state: { configurable: !0 }, getters: { configurable: !0 } };
+    _ = { state: { configurable: !0 }, getters: { configurable: !0 } };
 function g(t) {
-    return new _(t);
+    return new y(t);
 }
-(_.prototype.triggerCommit = function(t, e) {
-    var n = d(t, this),
-        o = n.module,
-        r = n.actionName,
-        i = n.nextModuleName,
-        a = o._mutations[r];
-    if (!a)
-        throw new c(
-            "\n                commit " +
-                r +
-                " in " +
-                (i || "root") +
-                " module is invalid. please check your commit name.\n            "
-        );
-    a(o._data, e),
-        this.notifyPlugins("mutation", {
-            name: r,
-            module: this._name,
-            fullPath: "root/" + t,
-            payload: e
-        });
+(y.prototype.initializeSettings = function(t) {
+    var n = t.name,
+        o = t.states,
+        r = t.mutations,
+        i = t.actions,
+        a = t.getters,
+        s = t.modules,
+        c = t.plugins;
+    (this._name = n || "root"),
+        (this._data = e(o)),
+        (this._mutations = r || Object.create(null)),
+        (this._getters = this.interceptGetters(this, a || Object.create(null))),
+        (this._actions = i || Object.create(null)),
+        (this._modules = s || Object.create(null)),
+        (this._states = Object.create(null)),
+        (this._modulesDictionary = new Map()),
+        (this._onMutationSubscribers = new Set()),
+        (this._onActionSubscribers = new Set()),
+        (this._pluginSubscribers = this.installPlugins(c));
 }),
-    (_.prototype.triggerDispatch = function(t, e, n) {
+    (y.prototype.triggerCommit = function(t, e) {
+        var n = d(t, this),
+            o = n.module,
+            r = n.actionName,
+            i = n.nextModuleName,
+            a = o._mutations[r];
+        if (!a)
+            throw new s(
+                "\n                commit " +
+                    r +
+                    " in " +
+                    (i || "root") +
+                    " module is invalid. please check your commit name.\n            "
+            );
+        a(o._data, e),
+            this.notifyCommits({
+                name: r,
+                module: this._name,
+                fullPath: "root/" + t,
+                payload: e
+            });
+    }),
+    (y.prototype.triggerDispatch = function(t, e, n) {
         var o = d(e, this),
             r = o.module,
             i = o.actionName,
             a = o.nextModuleName,
-            c = r._actions[i];
-        if (!c)
-            throw new s(
+            s = r._actions[i];
+        if (!s)
+            throw new c(
                 "\n                dispatch " +
                     i +
                     " in " +
@@ -229,21 +227,21 @@ function g(t) {
                     " module is invalid. please check your commit name.\n            "
             );
         var u,
-            l = c(t, n);
+            l = s(t, n);
         if (
+            (this.notifyActions({
+                name: i,
+                module: this._name,
+                fullPath: "root/" + e,
+                payload: n
+            }),
             null != (u = l) &&
-            "function" == typeof u.then &&
-            "function" == typeof u.catch
+                "function" == typeof u.then &&
+                "function" == typeof u.catch)
         )
             return l;
-        this.notifyPlugins("actions", {
-            name: i,
-            module: this._name,
-            fullPath: "root/" + e,
-            payload: n
-        });
     }),
-    (y.state.get = function() {
+    (_.state.get = function() {
         return (
             console.warn(
                 "\n            do not mutate state directly, use mutations for changing states value or getters to access the states.\n        "
@@ -251,19 +249,19 @@ function g(t) {
             this._states
         );
     }),
-    (y.getters.get = function() {
+    (_.getters.get = function() {
         return this._getters;
     }),
-    (_.prototype.interceptGetters = function(t, e) {
+    (y.prototype.interceptGetters = function(t, e) {
         return new Proxy(e, {
             get: function(e, o) {
                 var r = p(o);
                 if (r.length > 1) {
                     var i = d(r, t),
                         a = i.module,
-                        c = i.nextModuleName,
-                        s = i.nextPath;
-                    return (u.namespace = c), a.getters[s];
+                        s = i.nextModuleName,
+                        c = i.nextPath;
+                    return (u.namespace = s), a.getters[c];
                 }
                 if (!e[o])
                     throw new u(
@@ -279,16 +277,16 @@ function g(t) {
             }
         });
     }),
-    (_.prototype.installModules = function(t) {
+    (y.prototype.installModules = function(t) {
         void 0 === t && (t = this);
         var e = Object.entries(t._modules);
         e.length &&
             e.forEach(function(e) {
-                var n = new _(Object.assign({}, { name: e[0] }, e[1]));
+                var n = new y(Object.assign({}, { name: e[0] }, e[1]));
                 t._modulesDictionary.set(e[0], n);
             });
     }),
-    (_.prototype.installPlugins = function(t) {
+    (y.prototype.installPlugins = function(t) {
         var e,
             n = this;
         if (
@@ -316,20 +314,24 @@ function g(t) {
               }),
               t);
     }),
-    (_.prototype.notifyPlugins = function(t, e) {
-        var n =
-            "mutation" === t
-                ? this._onMutationSubscribers
-                : this._onActionSubscribers;
-        [].concat(n.values()).forEach(function(t) {
-            t(e);
+    (y.prototype.notifyCommits = function(t) {
+        var e = this._onMutationSubscribers;
+        this.notifyPlugins(t, e);
+    }),
+    (y.prototype.notifyActions = function(t) {
+        var e = this._onActionSubscribers;
+        this.notifyPlugins(t, e);
+    }),
+    (y.prototype.notifyPlugins = function(t, e) {
+        [].concat(e.values()).forEach(function(e) {
+            e(t);
         });
     }),
-    (_.prototype.install = function(t, e) {
+    (y.prototype.install = function(t, e) {
         t.provide(e || "bucket", this),
             (t.config.globalProperties.$bucket = this);
     }),
-    Object.defineProperties(_.prototype, y);
-var b = { createBucket: g, Bucket: _, useBucket: o };
+    Object.defineProperties(y.prototype, _);
+var b = { createBucket: g, Bucket: y, useBucket: o };
 export default b;
-export { _ as Bucket, g as createBucket, o as useBucket };
+export { y as Bucket, g as createBucket, o as useBucket };
