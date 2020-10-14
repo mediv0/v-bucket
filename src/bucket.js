@@ -100,10 +100,6 @@ export class Bucket {
             `);
         }
         const _asyncDispatch = _fn(_self, _payload);
-        // if is current dispatch fn doing an asynchronous task, return it to the user
-        if (isPromise(_asyncDispatch)) {
-            return _asyncDispatch;
-        }
 
         this.notifyActions({
             name: actionName,
@@ -111,6 +107,11 @@ export class Bucket {
             fullPath: `root/${_name}`,
             payload: _payload
         });
+
+        // if is current dispatch fn doing an asynchronous task, return it to the user
+        if (isPromise(_asyncDispatch)) {
+            return _asyncDispatch;
+        }
     }
 
     get state() {
