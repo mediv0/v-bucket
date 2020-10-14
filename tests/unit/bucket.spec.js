@@ -6,6 +6,7 @@ import {
     InvalidGetterException,
     InstallPluginsOnModulesException
 } from "@/Errors";
+import { isPromise } from "@/utils";
 
 import { createApp } from "vue";
 
@@ -593,6 +594,58 @@ describe("bucket.js", () => {
         expect(bucket._onActionSubscribers.size).toBe(1);
 
         bucket.dispatch("SET_ID");
+        expect(onActionSpy).toHaveBeenCalled();
+        expect(onActionSpy).toHaveBeenCalledTimes(1);
+        expect(onActionSpy).toHaveBeenCalledWith(actionMock, actionSubscribers);
+        expect(notifyActions).toHaveBeenCalledWith(actionMock);
+        expect(onActionCallback).toHaveBeenCalled();
+        expect(onActionCallback).toHaveBeenCalledWith(actionMock);
+
+        // reset mocks
+        onActionSpy.mockClear();
+        onActionCallback.mockClear();
+        notifyActions.mockClear();
+    });
+
+    it("dispatching an async action should notify onAction hooks", () => {
+        const onActionSpy = jest.spyOn(Bucket.prototype, "notifyPlugins");
+        const notifyActions = jest.spyOn(Bucket.prototype, "notifyActions");
+
+        const actionMock = {
+            name: "SET_ID",
+            module: "root",
+            fullPath: "root/SET_ID",
+            payload: undefined
+        };
+        const onActionCallback = jest.fn();
+
+        const myPlugin = () => bucket => {
+            bucket.onAction(onActionCallback);
+        };
+
+        const actionSubscribers = new Set();
+        actionSubscribers.add(onActionCallback);
+
+        const plugins = [myPlugin()];
+        const bucket = createBucket({
+            states: {
+                id: 1
+            },
+            actions: {
+                SET_ID() {
+                    return Promise.resolve("test");
+                }
+            },
+            plugins
+        });
+
+        expect(bucket._pluginSubscribers).toEqual(plugins);
+        expect(bucket._pluginSubscribers.length).toBe(1);
+        expect(bucket._onActionSubscribers.size).toBe(1);
+
+        const _action = bucket.dispatch("SET_ID");
+        expect(isPromise(_action)).toBe(true);
+        expect(_action).resolves.toBe("test");
         expect(onActionSpy).toHaveBeenCalled();
         expect(onActionSpy).toHaveBeenCalledTimes(1);
         expect(onActionSpy).toHaveBeenCalledWith(actionMock, actionSubscribers);
