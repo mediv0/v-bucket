@@ -276,7 +276,7 @@ const bucket = createBucket({
 
 all getters will take 1 parameter:
 
--   state (used to access states object)
+-   state (using to access states object)
 
 using it in your vue app:
 
