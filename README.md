@@ -413,7 +413,7 @@ methods: {
    click() {
 
      this.$bucket.getters["moduleA/get_id"]; // `moduleA`'s getter
-     this.$bucket.getters["moduleB/get_name]; // `moduleB`'s name state
+     this.$bucket.getters["moduleB/get_name"]; // `moduleB`'s name state
 
      // you can go deep as many levels as you want
      this.$bucket.getters["moduleA/moduleB/moduleC/moduleH/...];
@@ -441,7 +441,7 @@ methods: {
    click() {
 
      this.$bucket.commit("moduleA/set_id"); // we can access mutations by commit()
-     this.$bucket.commit("moduleB/set_name); // we can access mutations by commit()
+     this.$bucket.commit("moduleB/set_name"); // we can access mutations by commit()
 
      // ...
    }
@@ -457,7 +457,7 @@ methods: {
    click() {
 
      this.$bucket.dispatch("moduleA/set_id"); // we can access mutations by dispatch()
-     this.$bucket.dispatch("moduleB/set_name); // we can access mutations by dispatch()
+     this.$bucket.dispatch("moduleB/set_name"); // we can access mutations by dispatch()
 
      // ...
    }
