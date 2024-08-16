@@ -213,6 +213,7 @@ export class Bucket {
 
     notifyPlugins(_data, _cbs) {
         [..._cbs.values()].forEach(cb => {
+            if (typeof cb !== "function") return;
             cb(_data);
         });
     }
