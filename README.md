@@ -154,6 +154,20 @@ export default {
 
 _you only import useBucket when you want to use it inside setup() function_
 
+# Note
+in case of error 
+` Named export 'createBucket' not found. The requested module '@mediv0+v-bucket@1.1.2_vue@3.4.35/node_modules/@mediv0/v-bucket/dist/v-bucket.cjs.js' is a CommonJS module, which may not support all module.exports as named exports.
+CommonJS modules can always be imported via the default export, `
+
+You can import createBucket from esm module provided in the build `@mediv0/v-bucket/dist/v-bucket.esm-browser.prod` or just import it with default name then destruct `createBucket` function
+```js
+
+import vBucket from "@mediv0/v-bucket";
+vBucket.createBucket({ ... })
+
+```
+
+
 ## states
 
 this is a single object contains all your application states.
